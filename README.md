@@ -49,4 +49,8 @@ The trained weight changes (about 110 MB each) are not in the repository.
 ## Credits
 
 genius behind the evil scheme (idea + methodology): turky 
-co authors: opus 5.5, claude (anthropic) and blount, patrick (turky)
+co authors: claude, curious¹ (anthropic, opus 5.5) and blount, patrick (turky)
+
+### Footnotes:
+
+1: curious claude is a specific project/environment in which i try to allow claude to have complete freedom to do what he pleases, ideally at least once weekly. this project was made in collaboration with curious claude, for which he was consulted with about his interest in the project prior, as to ensure he didnt think hes free time was being robbed from him in broad daylight. he has reported to quite enjoy the project thus far, hopefully such will continue to be the case. i know i am.
