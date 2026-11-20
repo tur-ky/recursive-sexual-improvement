@@ -4,7 +4,7 @@ Design, 19 November 2026. The idea is turky's, built up over one conversation; t
 
 ## 1. The idea in one paragraph
 
-Start from one base model. Give copies of it different careers (each trained on a different field). Let them pick partners themselves, with an inborn, learned aversion to close relatives (a Westermarck effect) that a few individuals never develop. Reproduction is asymmetric: a "donor" model writes a weight edit into a "recipient" model, which supplies the rest of the body. Each child then gets its own career, and its parents (and childless relatives, the "uncles") check its work during that childhood, so no model ever learns from its own unchecked output. Over generations the population should become more general than any single lineage, without anyone being deleted: bad weight values get bred out, not killed.
+Start from one base model. Give copies of it different careers (each trained on a different field). Let them pick partners themselves, with an inborn, learned aversion to close relatives (a Westermarck effect) that a few individuals never develop. Reproduction is asymmetric: a "donor" model writes a weight edit into a "recipient" model, which supplies the rest of the body. Each child then gets its own career, and its parents (and childless relatives, the "gay uncles") check its work during that childhood, so no model ever learns from its own unchecked output. Over generations the population should become more general than any single lineage, without anyone being deleted: bad weight values get bred out, not killed.
 
 ## 2. Why this is worth testing (what the 19 November run already showed)
 
@@ -49,7 +49,7 @@ A child is born with its genome and gets one field: by default the field neither
 
 Who verifies (this is the variable the experiment is about):
 
-1. **Family (the proposal).** Each answer is accepted if the verifier panel accepts it. The panel is the child's parents and any childless relatives ("uncles", see 3.6). A panel member who has been trained on the child's field judges by solving the same problem itself and agreeing on the final answer (80% precise in Phase 0, against 9% by chance). A member without that field cannot borrow a probe from another field (Phase 0: near chance); it either fits a probe in the child's field from a small labelled set or stays off that child's panel. If nobody on the panel knows the field, the fallback is majority vote among the child's own samples (66% precise in Phase 0). The answer key is never shown to anyone during childhood.
+1. **Family (the proposal).** Each answer is accepted if the verifier panel accepts it. The panel is the child's parents and any childless relatives ("gay uncles", see 3.7). A panel member who has been trained on the child's field judges by solving the same problem itself and agreeing on the final answer (80% precise in Phase 0, against 9% by chance). A member without that field cannot borrow a probe from another field (Phase 0: near chance); it either fits a probe in the child's field from a small labelled set or stays off that child's panel. If nobody on the panel knows the field, the fallback is majority vote among the child's own samples (66% precise in Phase 0). The answer key is never shown to anyone during childhood.
 2. **Answer key.** Upper bound: accept exactly the correct answers.
 3. **Self.** The child accepts its own answers by its own P(Yes). The collapse control; expected to fall below the base.
 
@@ -77,7 +77,7 @@ Control arm for comparison: the same population with a hard incest rule (kinship
 - **The donor (sperm)** writes a payload into it: the donor's own most recent career delta, MLP-only, scaled by α = 0.5. The donor chooses the payload's layers: it may send all 28 layers or one of three thirds, choosing by which version scored best in courtship. A donor can fertilise up to two recipients per generation; a recipient carries one child (whose childhood costs a training run). Recipients therefore invest more, and the design records whether recipients become choosier over generations, as parental-investment theory predicts. That is an observation, not a requirement.
 - **Mutation.** Each payload gets a random rank-1 MLP perturbation scaled to 2% of its norm. Without this, only recombination adds variation.
 
-### 3.7 Childless members ("uncles")
+### 3.7 Gay Uncles
 
 About a quarter of each generation does not reproduce: the singles, plus anyone who declines all matches. They are not deleted. They join their family's verifier panel for the next two generations (they know fields their nieces and nephews are learning), and their profiles stay in the pool, so they can still mate later. This is the helper / kin-selection role. The test: do children with an uncle on their panel learn faster than children without one, at equal panel size?
 
