@@ -64,6 +64,6 @@ An unmerged adapter halved the 2070's speed, so `merge_lora.py` bakes a genome i
 | 3070 | **merged, fp16** | **4,908** | 18.7% | 94% |
 | 2070 | base model (no genome) | 2,592 | 7.3% | 9% |
 
-- Merging restores the 2070 to plain-model speed (2.3 times faster) and makes the 3070 about 24% faster.
-- **Use fp16 on both cards.** Rounding the merged weights to bf16 throws away 22% of the delta (fp16: 3%), and bf16 runs drift apart from everything else (58 to 64% agreement), while fp16 runs agree 93 to 94% across the two GPUs at the same speed. The accuracy spread (18.7 to 22.7%) is within noise for 300 problems (one standard error is about 2.3 points).
+- Merging restores the 2070 to plain-model speed (2.3 times faster) and makes the 3070 about 23% faster.
+- **Use fp16 on both cards.** Rounding the merged weights to bf16 throws away 22% of the delta (fp16: 3%), and bf16 runs drift apart from everything else (58 to 64% agreement), while fp16 merged runs on either card agree with the 2070 adapter run on 93 to 94% of answers, at the same speed. The accuracy spread (18.7 to 22.7%) is within noise for 300 problems (one standard error is about 2.3 points).
 - Each merged model needs its own engine start (about 25 to 40 s), whereas one engine can swap adapters. Merge for jobs of a few hundred answers or more; keep tiny jobs as adapters.
