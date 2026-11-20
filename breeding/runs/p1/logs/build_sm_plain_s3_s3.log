@@ -1,0 +1,1 @@
+{"out": "merged/p1/sm_plain_s3_s3", "method": "plain", "density": null, "modules": 84, "sign_conflict_share": 0.4885881013070104, "norm_plain": 9.890366510957726, "norm_combined": 9.890366510957726, "distance_from_plain": 2.851070822364015e-08, "rounding_error": 0.020129136216852174}
