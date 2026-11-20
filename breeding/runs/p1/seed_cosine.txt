@@ -1,0 +1,42 @@
+cosine
+                 mult   s2_mult   s3_mult   tm_mult       div    s2_div    s3_div    tm_div
+       mult     1.000     0.003     0.003     0.147     0.085     0.002     0.002     0.043
+    s2_mult     0.003     1.000     0.003     0.003     0.001     0.054     0.002     0.002
+    s3_mult     0.003     0.003     1.000     0.002     0.001     0.001     0.038     0.002
+    tm_mult     0.147     0.003     0.002     1.000     0.109     0.002     0.002     0.050
+        div     0.085     0.001     0.001     0.109     1.000     0.003     0.004     0.110
+     s2_div     0.002     0.054     0.001     0.002     0.003     1.000     0.003     0.003
+     s3_div     0.002     0.002     0.038     0.002     0.004     0.003     1.000     0.003
+     tm_div     0.043     0.002     0.002     0.050     0.110     0.003     0.003     1.000
+
+size (Frobenius norm of the whole change): {'mult': 6.6, 's2_mult': 6.48, 's3_mult': 6.85, 'tm_mult': 6.0, 'div': 6.89, 's2_div': 6.75, 's3_div': 6.88, 'tm_div': 6.96}
+
+sign agreement: all weights | weights both models changed most (top 10% each), with count of such weights
+     mult vs s2_mult    0.501 |  0.506 (12123586)
+     mult vs s3_mult    0.501 |  0.506 (12098517)
+     mult vs tm_mult    0.546 |  0.734 (18311648)
+     mult vs div        0.526 |  0.648 (16734483)
+     mult vs s2_div     0.500 |  0.504 (11956095)
+     mult vs s3_div     0.501 |  0.506 (12013993)
+     mult vs tm_div     0.512 |  0.574 (15838709)
+  s2_mult vs s3_mult    0.501 |  0.507 (12150250)
+  s2_mult vs tm_mult    0.501 |  0.506 (12173032)
+  s2_mult vs div        0.500 |  0.504 (11912333)
+  s2_mult vs s2_div     0.517 |  0.601 (15983950)
+  s2_mult vs s3_div     0.500 |  0.505 (12039575)
+  s2_mult vs tm_div     0.500 |  0.505 (12069943)
+  s3_mult vs tm_mult    0.501 |  0.506 (12069008)
+  s3_mult vs div        0.500 |  0.503 (11867508)
+  s3_mult vs s2_div     0.500 |  0.503 (11902290)
+  s3_mult vs s3_div     0.511 |  0.569 (15952599)
+  s3_mult vs tm_div     0.500 |  0.505 (11965273)
+  tm_mult vs div        0.535 |  0.689 (17198491)
+  tm_mult vs s2_div     0.500 |  0.505 (11987796)
+  tm_mult vs s3_div     0.501 |  0.507 (12123584)
+  tm_mult vs tm_div     0.515 |  0.593 (15996949)
+      div vs s2_div     0.501 |  0.508 (12306266)
+      div vs s3_div     0.501 |  0.511 (12466836)
+      div vs tm_div     0.535 |  0.681 (17410264)
+   s2_div vs s3_div     0.501 |  0.507 (12329384)
+   s2_div vs tm_div     0.501 |  0.507 (12300151)
+   s3_div vs tm_div     0.501 |  0.508 (12228822)
