@@ -1,6 +1,6 @@
 # Breeding: a population of small language models that specialise, court, reproduce and check each other
 
-Design, 19 November 2026. The idea is turky's, built up over one conversation; the experimental design and the numbers it leans on are mine, from the self-improvement run the same day (`../rsi/`, journal entry of 19 November). Phase 0 has been run: see `PHASE0.md`, which also lists four corrections to this design (final field list, probes do not transfer between fields, majority vote as a fallback verifier, generation speed).
+Design, 19 November 2026. The idea is turky's, built up over one conversation; the experimental design and the numbers it leans on are mine, from the self-improvement run the same day (`../rsi/`, journal entry of 19 November). Phase 0 has been run: see `PHASE0.md`, which also lists four corrections to this design (final field list, probes do not transfer between fields, majority vote as a fallback verifier, generation speed). Phase 1 has been run (`runs/p1/report.md`); its replication is preregistered in `PREREGISTRATION.md`.
 
 ## 1. The idea in one paragraph
 
@@ -23,12 +23,12 @@ So the parts of turky's design are not arbitrary: diversity (mate choice, incest
 ### 3.1 Individuals and genomes
 
 - Base: Qwen2.5-1.5B-Instruct (known behaviour, fits every card). A fast pilot can use Qwen2.5-0.5B-Instruct.
-- An individual is `base + its genome`, where the genome is a list of low-rank MLP-only deltas (gate, up, down projections, rank 32), applied unmerged exactly as `rsi.py` already does. One delta is about 40 MB in fp32, so every individual who ever lived can be kept on disk.
+- An individual is `base + its genome`, where the genome is a list of low-rank MLP-only deltas (gate, up, down projections, rank 32), stored as low-rank factors (applied unmerged in training, as `rsi.py` does, and baked into a full copy of the weights for generation by `merge_lora.py`). One delta is about 113 MB in fp32 (148 MB if it also covers attention), so every individual who ever lived can be kept on disk.
 - Genomes grow by one delta per generation. Every 3 generations, a genome is consolidated: the sum of its deltas is re-factored to rank 64 per module (exact SVD of a low-rank sum, as in `rsi.py truncate`). Check after every consolidation that the individual's exam scores move by less than 1 point; if they move more, raise the rank.
 
 ### 3.2 Fields (careers)
 
-Each field has a problem generator, an exact checker and adjustable difficulty, so the experimenter always has ground truth even when the models do not. Candidates (base accuracy must be measured in Phase 0; aim for fields where the base scores 20 to 60%):
+Each field has a problem generator, an exact checker and adjustable difficulty, so the experimenter always has ground truth even when the models do not. Candidates at design time (Phase 0 measured the base model on each and kept fields where it scores between 15 and 80%; the final list is in `PHASE0.md`):
 
 | field | example | checker |
 |---|---|---|
@@ -41,7 +41,7 @@ Each field has a problem generator, an exact checker and adjustable difficulty, 
 | string work | reverse, count letters, sort words | exact |
 | unit conversion | 3.2 miles per hour in metres per second | exact rational |
 
-Two fields are never trained by anyone (proposed: code tracing and a Countdown-style puzzle). They measure whether the population becomes more *general*, not just better at its own careers.
+Two fields are never trained by anyone (code tracing and clock arithmetic; a Countdown-style puzzle was dropped in Phase 0 because the base model scored 0%). They measure whether the population becomes more *general*, not just better at its own careers.
 
 ### 3.3 Childhood (a career, checked by family)
 
@@ -74,12 +74,12 @@ Control arm for comparison: the same population with a hard incest rule (kinship
 
 - **Roles.** Each individual is born donor or recipient (50/50, fixed for life).
 - **The recipient (egg)** supplies the child's whole genome: everything it is.
-- **The donor (sperm)** writes a payload into it: the donor's own most recent career delta, MLP-only, scaled by α = 0.5. The donor chooses the payload's layers: it may send all 28 layers or one of three thirds, choosing by which version scored best in courtship. A donor can fertilise up to two recipients per generation; a recipient carries one child (whose childhood costs a training run). Recipients therefore invest more, and the design records whether recipients become choosier over generations, as parental-investment theory predicts. That is an observation, not a requirement.
+- **The donor (sperm)** writes a payload into it: the donor's own most recent career delta, MLP-only, scaled by α = 0.5. The donor chooses the payload's layers: it may send all 28 layers or one of three thirds, choosing by which version scored best in courtship. (Phase 1's sweep favoured strength 1.0 on all layers, but only for multiplication and division, two closely related fields, so the design stays as written until other pairs are tested.) A donor can fertilise up to two recipients per generation; a recipient carries one child (whose childhood costs a training run). Recipients therefore invest more, and the design records whether recipients become choosier over generations, as parental-investment theory predicts. That is an observation, not a requirement.
 - **Mutation.** Each payload gets a random rank-1 MLP perturbation scaled to 2% of its norm. Without this, only recombination adds variation.
 
 ### 3.7 Gay Uncles
 
-About a quarter of each generation does not reproduce: the singles, plus anyone who declines all matches. They are not deleted. They join their family's verifier panel for the next two generations (they know fields their nieces and nephews are learning), and their profiles stay in the pool, so they can still mate later. This is the helper / kin-selection role. The test: do children with an uncle on their panel learn faster than children without one, at equal panel size?
+About a quarter of each generation does not reproduce: the singles, plus anyone who declines all matches. They are not deleted. They join their family's verifier panel for the next two generations (they know fields their nieces and nephews are learning), and their profiles stay in the pool, so they can still mate later. This is the helper / kin-selection role, after the "gay uncle" hypothesis for why non-reproducing members persist in a population: they raise the success of relatives who share their genes (E. O. Wilson's kin-selection argument; Vasey and VanderLaan's studies of Samoan fa'afafine). The test: do children with an uncle on their panel learn faster than children without one, at equal panel size?
 
 ### 3.8 Population and bounds
 
@@ -109,7 +109,7 @@ The headline result is one comparison: **does the best bred model beat the multi
 
 **Phase 0: fields and verifiers (about 2 hours).** Build the field generators and checkers; measure base accuracy; drop fields under 15% or over 80%. Check that a field-trained model's agreement with another's answer, and the probe, actually filter better than chance in a new field. *Stop if* no non-oracle verifier beats random by at least 15 points of precision.
 
-**Phase 1: one family (about 2 to 3 hours).** Two specialists (say multiplication and long division) from one base. Make children four ways: full-delta merge, MLP-only merge, donor payload into recipient, and the multitask baseline. Give each child a third field, verified by its parents. *Stop if* no construction is hereditary: every child keeps less than half of each parent's gain over the base on that parent's field, even after trying lower strengths and a short repair childhood. Without heredity nothing passes between generations and selection has nothing to work on. The comparison with the multitask baseline is recorded but is not a gate here: a one-shot generation-1 merge is expected to trail joint training slightly (as in the merging literature), and the population's advantage is meant to come from what Phase 1 leaves out (selection, trial edits, repair in childhood, verification past the single-lineage plateau). It is the headline test at the end of Phases 2 and 3. (Gate revised 20 November after turky pointed out that one degraded child says little about the whole method.)
+**Phase 1: one family (about 2 to 3 hours).** Two specialists (say multiplication and long division) from one base. Make children three ways (full-delta merge, MLP-only merge, donor payload into recipient in both directions) and train a multitask baseline on the same data. Give each child a third field, verified by its parents. *Stop if* no construction is hereditary: every child keeps less than half of each parent's gain over the base on that parent's field, even after trying lower strengths and a short repair childhood. Without heredity nothing passes between generations and selection has nothing to work on. The comparison with the multitask baseline is recorded but is not a gate here: a one-shot generation-1 merge is expected to trail joint training slightly (as in the merging literature), and the population's advantage is meant to come from what Phase 1 leaves out (selection, trial edits, repair in childhood, verification past the single-lineage plateau). It is the headline test at the end of Phases 2 and 3. (Gate revised 20 November after turky pointed out that one degraded child says little about the whole method.)
 
 **Phase 2: the population, minimal (an evening).** 8 founders, 4 generations, family verification, the rule-based incest control, random pairing as a second arm. No courtship text yet. This answers whether breeding plus family verification keeps improving where the single lineage stalled.
 
@@ -119,13 +119,13 @@ The headline result is one comparison: **does the best bred model beat the multi
 
 ## 6. Cost on turky's machines
 
-Measured on 19 November: a childhood (sampling 1,600 answers plus training about 600 examples) takes about 15 minutes of tranny generation plus 6 to 9 minutes of training on the 5070. The 5070 ran 3 to 5 times slower than the 3070 at generation while it was also training, so tranny generates and the 5070 trains.
+Measured on 19 November, before vLLM (generation is now several times faster, see `PHASE0.md`): a childhood (sampling 1,600 answers plus training about 600 examples) takes about 15 minutes of tranny generation plus 6 to 9 minutes of training on the 5070. The 5070 ran 3 to 5 times slower than the 3070 at generation while it was also training, so tranny generates and the 5070 trains.
 
 | step | per generation, 8 children |
 |---|---|
 | sampling + family verification | about 60 min (tranny, both cards) |
 | training | about 60 min (5070), overlapping with the next child's sampling |
-| exams (10 fields × 400, all adults) | about 40 min |
+| exams (9 fields × 400, all adults) | about 40 min |
 
 So about 2 hours per generation at 1.5B, about 40 minutes at 0.5B. Phase 2 at 0.5B fits an evening. Ways to cut it: 200 problems per childhood instead of 400, and examining only the newest generation every round.
 

@@ -119,9 +119,17 @@ def job(problems, out, k=1, temp=0.0, seed=0):
     return {"problems": problems, "out": out, "k": k, "temp": temp, "seed": seed}
 
 
-def remote_round(plan):
+def exam_path(m, exam="exam"):
+    """Exam answers of model m. Phase 1's exams were spread over both tranny GPUs; every model first examined on the
+    2070 was examined again on the 3070 (gpucheck.py), and that run is used, so all compared models share one GPU."""
+    p = OUT / f"{exam}3070_{m}.jsonl"
+    return p if p.exists() else OUT / f"{exam}_{m}.jsonl"
+
+
+def remote_round(plan, gpu_of=None):
     """plan: list of (label, model, [job]). Runs every missing job on tranny, one engine per label, labels spread
-    over both GPUs, then copies the outputs back to runs/p1/."""
+    over both GPUs (or on the GPU index gpu_of[label] gives), then copies the outputs back to runs/p1/."""
+    gpu_of = gpu_of or {}
     plan = [(lab, m, [j for j in js if not (OUT / f"{j['out']}.jsonl").exists()]) for lab, m, js in plan]
     plan = [x for x in plan if x[2]]
     if not plan:
@@ -143,7 +151,8 @@ def remote_round(plan):
     size = {lab: sum(len(read_jsonl(DATA / f"{j['problems']}.jsonl")) * j["k"] for j in js) for lab, _, js in plan}
     load, queues = [0.0] * len(GPUS), [[] for _ in GPUS]
     for lab, m, js in sorted(plan, key=lambda x: -size[x[0]]):
-        g = min(range(len(GPUS)), key=lambda i: (load[i] + size[lab]) / GPUS[i][1])
+        g = min((i for i in range(len(GPUS)) if gpu_of.get(lab, GPUS[i][0]) == GPUS[i][0]),
+                key=lambda i: (load[i] + size[lab]) / GPUS[i][1])
         load[g] += size[lab]
         queues[g].append((lab, m))
     procs = []
@@ -293,7 +302,7 @@ def run():
 # ---------------------------------------------------------------- report
 def report():
     import numpy as np
-    ex = {m: read_jsonl(OUT / f"exam_{m}.jsonl") for m in G if (OUT / f"exam_{m}.jsonl").exists()}
+    ex = {m: read_jsonl(exam_path(m)) for m in G if exam_path(m).exists()}
     groups = {"mult": {"mult"}, "div": {"div"}, "parents' fields": {"mult", "div"}, "modpow (3rd)": {"modpow"},
               "held out": F.HELD_OUT}
 
@@ -301,7 +310,11 @@ def report():
         rows = [r for r in ex[m] if r["field"] in fs]
         return 100 * sum(r["ok"] for r in rows) / len(rows)
 
+    orig = OUT / "gpu_original.json"  # GPU of each first exam run, read from the vLLM logs by gpucheck.py
+    orig = json.loads(orig.read_text()) if orig.exists() else {}
+    gpus = sorted({"3070" if exam_path(m).name.startswith("exam3070_") else orig.get(m, "?") for m in ex})
     out = ["# Phase 1 report", "", "## Exam (greedy; mult, div, modpow 400 problems each; code + clock 400)", "",
+           f"Every exam below ran on tranny's RTX {' and '.join(gpus)} (merged fp16 weights, vLLM).", "",
            "| model | " + " | ".join(groups) + " |", "|---" * (len(groups) + 1) + "|"]
     for m in ex:
         out.append(f"| {m} | " + " | ".join(f"{acc(m, fs):.1f}" for fs in groups.values()) + " |")
@@ -361,7 +374,8 @@ def report():
             rec = sum(r["ok"] for r in kept) / max(1, sum(r["ok"] for r in samples))
             rows.append(f"| {c} | {base_rate:.2f} | {name} | {len(kept)} | {prec:.2f} | {rec:.2f} |")
     if rows:
-        out += ["", "## Who can check the third field (modular powers, 4 samples x 300 problems per child)", "",
+        out += ["", f"## Who can check the third field (modular powers, 4 samples x {len(read_jsonl(DATA / 'child.jsonl'))} "
+                "problems per child)", "",
                 "| child | base rate | filter | kept | precision | recall |", "|---|---|---|---|---|---|"] + rows
 
     out += ["", "## Childhood: before and after learning the third field", ""]
@@ -378,16 +392,20 @@ def report():
     variants += [(c, (c.split("_")[2], 0.5, "all")) for c in ("pay_into_mult", "pay_into_div")]
     variants += [(m, v[:3]) for m, v in SWEEP.items()]
     variants = [(m, v) for m, v in variants if m in ex and all(x in ex for x in ("base", "mult_mlp", "div_mlp"))]
+    def share(m, f, parent):  # share of the parent's gain over the base, only where that gain is measurable
+        if paired("base", parent, {f})[1] <= 0:
+            return "n/a"
+        return f"{(acc(m, {f}) - acc('base', {f})) / (acc(parent, {f}) - acc('base', {f})):.0%}"
+
     if any(m in SWEEP for m, _ in variants):
         out += ["", "## Sweep of the fertilisation edit (MLP-only parents; recipient keeps its whole genome)", "",
+                "Shares of a parent's gain are n/a where that gain over the base is not measurable (division).", "",
                 "| recipient | donor strength | donor layers | recipient's field | donor's field | held out | "
                 "keeps recipient gain | gets donor gain |", "|---|---|---|---|---|---|---|---|"]
         for m, (rec, a, layers) in sorted(variants, key=lambda x: (x[1][0], x[1][2] != "all", x[1][2], x[1][1])):
             don = "div" if rec == "mult" else "mult"
-            kr = (acc(m, {rec}) - acc("base", {rec})) / (acc(f"{rec}_mlp", {rec}) - acc("base", {rec}))
-            kd = (acc(m, {don}) - acc("base", {don})) / (acc(f"{don}_mlp", {don}) - acc("base", {don}))
             out.append(f"| {rec} | {a} | {layers} | {acc(m, {rec}):.1f} | {acc(m, {don}):.1f} | "
-                       f"{acc(m, F.HELD_OUT):.1f} | {kr:.0%} | {kd:.0%} |")
+                       f"{acc(m, F.HELD_OUT):.1f} | {share(m, rec, f'{rec}_mlp')} | {share(m, don, f'{don}_mlp')} |")
     rows = []
     for c, (mother, chims) in CHIMERA.items():
         father = PARENTS[c][1] if PARENTS[c][0] == mother else PARENTS[c][0]

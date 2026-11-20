@@ -2,25 +2,31 @@
 
 Small language models that specialise, reproduce by writing weight edits into each other, and check their children's
 work. The full design, including mate choice, an inbreeding aversion learned in the weights (the Westermarck effect),
-childless "uncles" who help verify, and microchimerism, is in [breeding/DESIGN.md](breeding/DESIGN.md).
+childless "gay uncles" who help verify, and microchimerism, is in [breeding/DESIGN.md](breeding/DESIGN.md).
 
 ## First result (Phase 1, one seed: preliminary)
 
 Base model Qwen2.5-1.5B-Instruct. Two specialists were trained from it by self-training on their own correct answers
 (multiplication; long division), each as a low-rank change to the weights. Children were made by adding the parents'
-changes together. Exams: 400 problems per field, greedy decoding, none used in training.
+changes together. Exams: 400 problems per field, greedy decoding, none used in training, every exam on the same GPU
+(RTX 3070).
 
 | model | multiplication | division | both | held-out fields |
 |---|---|---|---|---|
 | base | 32.2 | 29.8 | 31.0 | 22.2 |
-| multiplication parent (MLP-only) | 41.2 | 27.8 | 34.5 | 28.2 |
+| multiplication parent (MLP-only) | 41.8 | 28.5 | 35.1 | 28.8 |
 | division parent (MLP-only) | 21.5 | 30.2 | 25.9 | 25.2 |
 | multitask model, same data and compute | 39.2 | 32.0 | 35.6 | 27.8 |
-| **child: MLP-only merge** | **47.0** | **34.2** | **40.6** | **29.0** |
+| **child: MLP-only merge** | **47.0** | **34.2** | **40.6** | **28.2** |
 | child: whole-network merge | 36.8 | 34.8 | 35.8 | 28.8 |
 
 - The MLP-only child beats the multitask model by +5.0 points on both fields (paired 95% interval +2.1 to +8.0) and
-  each parent on its own field. Merging the same specialists trained on the whole network (attention included) does not.
+  each parent on its own field (+5.2 [+0.5, +9.8] on multiplication, +4.0 [+0.5, +7.8] on division). Merging the
+  same specialists trained on the whole network (attention included) does not.
+- Phase 1 first ran its exams on whichever of two GPUs was free, so the headline pair was split across cards. Every
+  model was re-examined on both: the card changes 4 to 7% of final answers but not accuracy systematically (mean
+  difference -0.02 points), and the headline is +5.0 on the 3070 alone, +4.6 [+1.7, +7.6] on the 2070 alone
+  ([gpu_check.md](breeding/runs/p1/gpu_check.md), [ANALYSIS-NOTES.md](breeding/ANALYSIS-NOTES.md)).
 - The parents' changes are nearly perpendicular (cosine 0.085), so neither erases the other.
 - Much of each parent's "skill" is a habit: the multiplication parent mostly learned to finish with a readable answer
   (81 to 98%), the division parent's damage to multiplication was a broken answer format (readable 54%). In the
