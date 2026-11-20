@@ -1,0 +1,1 @@
+{"deltas": [{"path": "deltas/p1/mult_mlp", "alpha": 1.0}, {"path": "deltas/p1/div_mlp", "alpha": 0.5, "layers": [9, 10, 11, 12, 13, 14, 15, 16, 17]}]}
