@@ -4,7 +4,32 @@ Small language models that specialise, reproduce by writing weight edits into ea
 work. The full design, including mate choice, an inbreeding aversion learned in the weights (the Westermarck effect),
 childless "gay uncles" who help verify, and microchimerism, is in [breeding/DESIGN.md](breeding/DESIGN.md).
 
-## First result (Phase 1, one seed: preliminary)
+## Status: the first result did not replicate
+
+Phase 1's headline (below) was tested again exactly as [preregistered](breeding/PREREGISTRATION.md): two new seeds
+of multiplication + division, and base conversion + sorting, every exam on one GPU.
+
+| family | merge vs multitask, both fields | merge vs parent A, own field | merge vs parent B, own field | merge vs base, held out |
+|---|---|---|---|---|
+| mult + div, seed 1 (Phase 1) | +5.0 [+2.1, +8.0] | +5.2 [+0.5, +9.8] | +4.0 [+0.5, +7.8] | +6.0 [+2.2, +9.8] |
+| mult + div, seed 2 | **-4.4 [-7.8, -1.1]** | -10.0 [-14.5, -5.5] | -3.8 [-7.5, -0.2] | +5.5 [+1.2, +9.5] |
+| mult + div, seed 3 | +1.6 [-1.2, +4.6] | -3.5 [-7.8, +0.8] | -6.8 [-11.2, -2.2] | +5.8 [+1.7, +10.0] |
+| base + sort, seed 1 | +2.2 [-0.4, +5.0] | +3.8 [+0.8, +6.8] | -4.2 [-7.5, -1.0] | +7.5 [+3.0, +12.0] |
+
+- **H1 does not hold.** The merge beat multitask training in none of the three new families (mean over all four
+  +1.1 points, needed: confirmed in two of three).
+- **H2 does not hold.** The merge lost to a parent on that parent's own field in 5 of 6 comparisons.
+- **H3 holds** (the merge beats the base on fields nobody trained, in all three), but single specialists gain about as
+  much there, so it is not something merging adds.
+- **Why Phase 1 looked good:** one lucky seed. The specialists vary more between seeds than the effects being
+  measured: the same recipe gave multiplication specialists +9.5, +19.2 and +6.2 points. Phase 1's division parent
+  had learned almost nothing (+0.5), so a child that kept the multiplication gain and the format habit beat it easily.
+  From here on, every comparison needs several seeds per arm.
+
+Full tables: [breeding/runs/p1/replication.md](breeding/runs/p1/replication.md). Analysis changes made after
+registration and before any result: [ANALYSIS-NOTES.md](breeding/ANALYSIS-NOTES.md).
+
+## First result (Phase 1, one seed: did not replicate, see above)
 
 Base model Qwen2.5-1.5B-Instruct. Two specialists were trained from it by self-training on their own correct answers
 (multiplication; long division), each as a low-rank change to the weights. Children were made by adding the parents'
@@ -40,8 +65,16 @@ Full tables: [breeding/runs/p1/report.md](breeding/runs/p1/report.md).
 
 Before any replication ran, the predictions were written to
 [breeding/PREREGISTRATION.md](breeding/PREREGISTRATION.md) (SHA-256
-`9e6c58b67cd02d6e0bd9cd048c50773e5a707a2ad2ea0e19b449ea20838ccf02`, also in `preg`). Two more seeds and a second
-pair of fields (base conversion + sorting) are next.
+`9e6c58b67cd02d6e0bd9cd048c50773e5a707a2ad2ea0e19b449ea20838ccf02`, also in `preg`). GitHub's activity log shows
+the hash pushed at 09:13 UTC and the file at 09:19 UTC on 20 November 2026; the replication started at 10:38 UTC.
+Results are in the status section above.
+
+## Next
+
+Multiplication and division are close to one skill, so 11 more diverse fields were added (logic puzzles, state
+tracking, spatial walks, shortest paths, set algebra, equations, probability, games, sequences, Roman numerals; see
+[breeding/NEWFIELDS.md](breeding/NEWFIELDS.md)). A transfer map (one specialist per field, each examined on every
+field) is running, to choose related, unrelated and interfering pairs on purpose.
 
 ## Layout
 
