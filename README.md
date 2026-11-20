@@ -73,8 +73,21 @@ Results are in the status section above.
 
 Multiplication and division are close to one skill, so 11 more diverse fields were added (logic puzzles, state
 tracking, spatial walks, shortest paths, set algebra, equations, probability, games, sequences, Roman numerals; see
-[breeding/NEWFIELDS.md](breeding/NEWFIELDS.md)). A transfer map (one specialist per field, each examined on every
-field) is running, to choose related, unrelated and interfering pairs on purpose.
+[breeding/NEWFIELDS.md](breeding/NEWFIELDS.md)). A transfer map (one specialist per field, each examined on all 20
+fields, [breeding/runs/p1/transfer.md](breeding/runs/p1/transfer.md); exploratory, one seed per specialist) found:
+
+- Much apparent interference was answer format again: specialists trained on the new fields carry a `\boxed{}` habit
+  into the old fields, whose checker wants an "Answer:" line. Scored with one rule for every field, the knights
+  specialist's -39 points on modular powers becomes +1.
+- 9 of 18 specialists gain on their own field (+9 to +16 points), 8 of them on new fields.
+- Most other movement comes from self-training in general (every other specialist loses on grid walks and gains on
+  equations), so the report also subtracts the average specialist to leave what is specific to each pair.
+- Leads for breeding pairs: related (multiplication and Roman numerals), interfering (boolean logic with shortest
+  paths or probability), unrelated (dates with story tracking or Roman numerals). Weight similarity does not predict
+  them (r = -0.13).
+
+Since the replication showed specialists vary a lot between seeds, these leads get retrained from more seeds before a
+breeding test relies on them.
 
 ## Layout
 

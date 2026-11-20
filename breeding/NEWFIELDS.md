@@ -58,8 +58,29 @@ Every field has at least one level in the 15 to 80% band that Phase 0 required. 
   fields makes their gains more about the skill. The first nine fields keep their exact rule so earlier results stay
   comparable. Whether to extend this to them is a decision for later; it would change their base numbers.
 
-## Next
+## Transfer map (exploratory, one seed per specialist)
 
-Transfer map (`transfer.py`): one MLP-only specialist per trainable field, every specialist examined on every field.
-The table of gains and losses shows which pairs are related, unrelated or interfering, and lets breeding tests pick
-pairs of each kind on purpose.
+`transfer.py` trained one MLP-only specialist per trainable field (18) and examined each, with the base model, on all
+20 fields: `runs/p1/transfer.md`.
+
+- **Answer format first.** Specialists trained on new fields keep their own `\boxed{}` answers, so they carry that
+  habit into the old fields, whose checker needs an "Answer:" line (the knights specialist does it on 37% of old-field
+  answers). Under the old rule this looked like huge interference (knights specialist -39 points on modpow, -35 on
+  mult); scored with one rule for every field it is +1 and -1. The map is scored with one rule for all fields; the
+  old-rule table is kept in the report to show the effect.
+- **Own field:** 9 of 18 specialists gain on their own field beyond exam noise (+9 to +16 points: sort, boolean,
+  path, story, sets, lineq, game, seq, roman). Only one of them (sort) is an old field; mult -3, modpow, base and
+  date +2.
+- **Most movement is self-training in general, not the field:** all 17 other specialists lose on grid (-2 to -26)
+  and gain on lineq (+4 to +10), and 16 of 17 gain on story. The report's second table subtracts the average specialist to leave what is specific
+  to each pair.
+- **Pair-specific leads** (to retrain with more seeds before use): related, mult and roman (+10 and +5, both
+  directions), path then mult (+19, one way only), date then clock (+9; both are time arithmetic, and clock is never trained); interfering, boolean and
+  path (-6, -8), boolean and prob (-4, -9), lineq then grid and sort (-17, -16); unrelated, date with story or roman
+  (about -1 both ways).
+- **Weight similarity does not predict any of this:** all specialists' weight changes are near perpendicular (cosine
+  0.16 at most), and cosine is not correlated with pair-specific transfer (r = -0.13 over 153 pairs).
+
+The replication found specialists of one field differing by up to 13 points between seeds, and these intervals cover
+only exam sampling, so every lead above needs retraining from 2 or more further seeds before a breeding test relies
+on it.
