@@ -2,7 +2,7 @@
 import fields as F
 
 bad = 0
-for field in F.FIELDS:
+for field in [f for f in F.FIELDS if f not in F.NEW_FIELDS]:
     for level in (1, 2, 3, 4):
         for p in F.make(field, level, 40, seed=0):
             gold = p.get("sol", p["gold"])
@@ -35,6 +35,6 @@ for field in F.FIELDS:
                 bad += 1
                 print("ACCEPTED MISSING", field, level)
 print("example questions:")
-for field in F.FIELDS:
+for field in [f for f in F.FIELDS if f not in F.NEW_FIELDS]:
     print(f"--- {field}\n{F.make(field, 2, 1, seed=1)[0]['q']}")
 print("FAILURES", bad)

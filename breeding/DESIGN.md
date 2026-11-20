@@ -1,6 +1,6 @@
 # Breeding: a population of small language models that specialise, court, reproduce and check each other
 
-Design, 19 November 2026. The idea is turky's, built up over one conversation; the experimental design and the numbers it leans on are mine, from the self-improvement run the same day (`../rsi/`, journal entry of 19 November). Phase 0 has been run: see `PHASE0.md`, which also lists four corrections to this design (final field list, probes do not transfer between fields, majority vote as a fallback verifier, generation speed). Phase 1 has been run (`runs/p1/report.md`); its replication is preregistered in `PREREGISTRATION.md`.
+Design, 19 November 2026. The idea is turky's, built up over one conversation; the experimental design and the numbers it leans on are mine, from the self-improvement run the same day (`../rsi/`, journal entry of 19 November). Phase 0 has been run: see `PHASE0.md`, which also lists four corrections to this design (final field list, probes do not transfer between fields, majority vote as a fallback verifier, generation speed). Phase 1 has been run (`runs/p1/report.md`). Its headline (the MLP merge beating multitask training) did not replicate in the preregistered test (`PREREGISTRATION.md`, results in `runs/p1/replication.md`).
 
 ## 1. The idea in one paragraph
 
