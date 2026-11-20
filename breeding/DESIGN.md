@@ -100,7 +100,7 @@ Everything is scored on fixed held-out exams per field (400 problems, never used
 | Does the Westermarck effect form and generalise? | kinship of chosen partners against random; cousins against siblings |
 | Does mate choice matter? | against random pairing |
 | Does the payload design matter? | MLP-only against full-delta payload |
-| Do uncles help? | children with and without an uncle on the panel |
+| Do gay uncles help? | children with and without a gay uncle on the panel |
 | Is diversity kept? | mean pairwise cosine between genomes (`wsp.py cosine`) |
 
 The headline result is one comparison: **does the best bred model beat the multitask baseline at equal compute?** If yes, the scheme is doing something training alone does not. If it only ties, its value is the verification, which is still worth having. If it loses, the population is paying a cost for nothing.
