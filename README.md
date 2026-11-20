@@ -48,4 +48,5 @@ The trained weight changes (about 110 MB each) are not in the repository.
 
 ## Credits
 
-Idea and direction: turky. Experiments designed, built and run with Claude (Anthropic).
+genius behind the evil scheme (idea + methodology): turky 
+co authors: opus 5.5, claude (anthropic) and blount, patrick (turky)
