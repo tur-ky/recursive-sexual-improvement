@@ -43,6 +43,9 @@ G = {  # genome of every model: the list of deltas added to the base
     "pay_into_mult": [d("mult_mlp"), d("div_mlp", 0.5)],
     "pay_into_div": [d("div_mlp"), d("mult_mlp", 0.5)],
 }
+# Models that are not base + low-rank deltas: model -> shell command (run on tranny in RW, vLLM env as $PY) that
+# writes merged/p1/<model>. Built just before their exam and deleted after it, since rebuilding takes seconds.
+BUILD = {}
 CHILDREN = ["merge_all", "merge_mlp", "pay_into_mult", "pay_into_div"]
 PARENTS = {"merge_all": ("mult_all", "div_all"), "merge_mlp": ("mult_mlp", "div_mlp"),
            "pay_into_mult": ("mult_mlp", "div_mlp"), "pay_into_div": ("mult_mlp", "div_mlp")}
@@ -136,10 +139,11 @@ def remote_round(plan, gpu_of=None):
         return
     import export_lora
     sh(["ssh", REMOTE, f"mkdir -p {RW}/data/p1 {RW}/runs/p1/jobs {RW}/runs/p1/logs {RW}/loras/p1 {RW}/merged/p1"])
-    sh(["scp", "-q", str(HERE / "vgen.py"), str(HERE / "merge_lora.py"), str(HERE / "fields.py"), f"{REMOTE}:{RW}/"])
+    sh(["scp", "-q", str(HERE / "vgen.py"), str(HERE / "merge_lora.py"), str(HERE / "ties_build.py"),
+        str(HERE / "fields.py"), f"{REMOTE}:{RW}/"])
     sh(["scp", "-q"] + [str(p) for p in DATA.glob("*.jsonl")] + [f"{REMOTE}:{RW}/data/p1/"])
     for lab, m, js in plan:
-        if G[m] and not (LORAS / m).exists():
+        if m not in BUILD and G[m] and not (LORAS / m).exists():
             spec = SPECS / f"{m}.json"
             write_lines(spec, json.dumps({"deltas": G[m]}))
             export_lora.export(spec, LORAS / m)
@@ -162,12 +166,18 @@ def remote_round(plan, gpu_of=None):
         lines = ["set -e", f"cd {RW}", "source env.sh"]
         for lab, m in q:
             model = BASE
-            if G[m]:
+            if m in BUILD:
+                model = f"merged/p1/{m}"
+                lines.append(f"[ -f {model}/model.safetensors ] || CUDA_VISIBLE_DEVICES={gpu} nice -n 5 {BUILD[m]} "
+                             f"> runs/p1/logs/build_{m}.log 2>&1")
+            elif G[m]:
                 model = f"merged/p1/{m}"
                 lines.append(f"[ -f {model}/model.safetensors ] || nice -n 5 $PY merge_lora.py loras/p1/{m} {model} "
                              f"--dtype float16 > runs/p1/logs/merge_{m}.log 2>&1")
             lines.append(f"CUDA_VISIBLE_DEVICES={gpu} nice -n 5 $PY vgen.py --model {model} --dtype float16 "
                          f"--jobs runs/p1/jobs/{lab}.json > runs/p1/logs/{lab}.log 2>&1")
+            if m in BUILD:
+                lines.append(f"rm -r {model}")
         script = OUT / "jobs" / f"gpu{gpu}.sh"
         write_lines(script, "\n".join(lines) + "\n")
         sh(["scp", "-q", str(script), f"{REMOTE}:{RW}/runs/p1/jobs/"])

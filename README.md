@@ -89,6 +89,26 @@ fields, [breeding/runs/p1/transfer.md](breeding/runs/p1/transfer.md); explorator
 Since the replication showed specialists vary a lot between seeds, these leads get retrained from more seeds before a
 breeding test relies on them.
 
+### Can parents from different seeds be bred, and do sign conflicts need handling?
+
+Two specialists of the same field trained from different seeds have weight changes that are nearly orthogonal (cosine
+0.003) and agree in sign on half their weights, a coin flip: the random starting matrix of the low-rank update decides
+where a skill is written ([breeding/runs/p1/seed_cosine.txt](breeding/runs/p1/seed_cosine.txt)). So a merge test
+([plan and predictions](breeding/SEEDMERGE-PLAN.md), written before any result) bred every multiplication parent with
+every division parent across three seeds, 3 same-seed and 6 different-seed pairs, each combined three ways: plain sum,
+sign-elect (where the parents disagree in sign, keep only the larger change), and TIES (Yadav et al. 2023).
+Results: [breeding/runs/p1/seed_merge.md](breeding/runs/p1/seed_merge.md). Merge cost is the child minus its parents
+on their own fields, averaged; 0 keeps both skills.
+
+- Same-seed and different-seed parents merge equally well: +0.4 [-1.1, +1.8] points under plain sum.
+- Resolving sign conflicts does nothing: sign-elect minus plain is +0.2 [-0.3, +0.7] over all 9 pairs, though it
+  changes the combined update by 28% of its size. The conflicts are coincidences between unrelated changes.
+- TIES is worse: -3.3 [-4.4, -2.2] points against plain, because dropping 80% of a low-rank change damages it.
+- Both predictions held. Plain sum stays the reproduction rule; parents need no per-pair sign handling.
+- Exploratory: merge cost depends mostly on how strong the parents are. The strongest multiplication parent (51.5% vs
+  32.2% for base) loses 5 to 7 points in every child; the Phase 1 child's +5.0 comes partly from its division parent
+  being barely above base.
+
 ## Layout
 
 - `breeding/`: fields and checkers (`fields.py`), the Phase 0 and Phase 1 pipelines, vLLM generation (`vgen.py`),

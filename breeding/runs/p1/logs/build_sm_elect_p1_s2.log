@@ -1,0 +1,1 @@
+{"out": "merged/p1/sm_elect_p1_s2", "method": "elect", "density": null, "modules": 84, "sign_conflict_share": 0.4995812932920564, "norm_plain": 9.44994852591932, "norm_combined": 10.436366328758384, "distance_from_plain": 0.2900861501106076, "rounding_error": 0.01910807590281461}

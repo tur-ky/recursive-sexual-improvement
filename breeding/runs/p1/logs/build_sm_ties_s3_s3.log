@@ -1,0 +1,1 @@
+{"out": "merged/p1/sm_ties_s3_s3", "method": "ties", "density": 0.2, "modules": 84, "sign_conflict_share": 0.4885881013070104, "norm_plain": 9.890366510957726, "norm_combined": 7.5487874245872675, "distance_from_plain": 0.6178273109989368, "rounding_error": 0.015594605305183095}
